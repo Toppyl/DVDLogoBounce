@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -37,14 +39,24 @@ namespace WindowsFormsApp1
             {
                 Spawn(mainForm);
             };
-            
 
+            Label fileName = new Label();
+            fileName.Text = path;
+            fileName.Location = new Point(200, 100);
+            fileName.Size = new Size(200, 25);
+
+            Label fileSize = new Label();
+            fileSize.Text = $"{File.ReadAllBytes(path).Length.ToString()} bytes";
+            fileSize.Location = new Point(200, 125);
+            fileSize.Size = new Size(200, 50);
 
             Button setPath = new Button();
             setPath.Text = "set dvd logo";
             setPath.Click += (sender, e) =>
             {
                 path = getNewPath();
+                fileName.Text = path.Split('\\').Last();
+                fileSize.Text = $"{File.ReadAllBytes(path).Length.ToString()} bytes";
             };
             setPath.Location = new Point(0, 100);
 
@@ -53,7 +65,11 @@ namespace WindowsFormsApp1
             resetPath.Click += (sender, e) =>
             {
                 path = defaultPath;
+                fileName.Text = path.Split('\\').Last();
+                fileSize.Text = $"{File.ReadAllBytes(path).Length.ToString()} bytes";
             };
+
+            
 
             resetPath.Location = new Point(100, 100);
 
@@ -86,10 +102,13 @@ namespace WindowsFormsApp1
             info.Location = new Point(0, 200);
             info.Width = 300;
 
+
             mainForm.Controls.Add(Title);
             mainForm.Controls.Add(button);
             mainForm.Controls.Add(setPath);
             mainForm.Controls.Add(resetPath);
+            mainForm.Controls.Add(fileName);
+            mainForm.Controls.Add(fileSize);
             mainForm.Controls.Add(setColor);
             mainForm.Controls.Add(resetColor);
             mainForm.Controls.Add(info);
@@ -100,43 +119,76 @@ namespace WindowsFormsApp1
             Random rng = new Random();
             System.Windows.Forms.Timer tmr = new System.Windows.Forms.Timer();
             Form MainWindow = new Form();
-            Image bg = Image.FromFile(path);
-
-            MainWindow.FormBorderStyle = FormBorderStyle.None;
-            MainWindow.BackgroundImage = bg;
-            MainWindow.BackColor = key;
-            MainWindow.TransparencyKey = MainWindow.BackColor;
-            MainWindow.Height = bg.Height;
-            MainWindow.Width = bg.Width;
-
-            float dx = 5f;
-            float dy = 5f;
-            float x = 5;
-            float y = 5;
-            tmr.Interval = 1;
-            tmr.Tick += onmove;
-            tmr.Start();
-            void onmove(object sender, EventArgs e)
+            try
             {
-                if (MainWindow.Location.X <= 0 || MainWindow.Location.X >= Screen.PrimaryScreen.WorkingArea.Width - MainWindow.Width)
+                Image bg = Image.FromFile(path);
+                MainWindow.FormBorderStyle = FormBorderStyle.None;
+                MainWindow.BackgroundImage = bg;
+                MainWindow.BackColor = key;
+                MainWindow.TransparencyKey = MainWindow.BackColor;
+                MainWindow.Height = bg.Height;
+                MainWindow.Width = bg.Width;
+
+                float dx = 5f;
+                float dy = 5f;
+                float x = 5;
+                float y = 5;
+                tmr.Interval = 1;
+                tmr.Tick += onmove;
+                tmr.Start();
+                void onmove(object sender, EventArgs e)
                 {
-                    dx = -dx;
+                    if (MainWindow.Location.X <= 0 || MainWindow.Location.X >= Screen.PrimaryScreen.WorkingArea.Width - MainWindow.Width)
+                    {
+                        dx = -dx;
+                    }
+                    if (MainWindow.Location.Y <= 0 || MainWindow.Location.Y >= Screen.PrimaryScreen.WorkingArea.Height - MainWindow.Height)
+                    {
+                        dy = -dy;
+                    }
+                    x += dx;
+                    y += dy;
+                    MainWindow.Location = new Point((int)Math.Round(x), (int)Math.Round(y));
                 }
-                if (MainWindow.Location.Y <= 0 || MainWindow.Location.Y >= Screen.PrimaryScreen.WorkingArea.Height - MainWindow.Height)
-                {
-                    dy = -dy;
-                }
-                x += dx;
-                y += dy;
-                MainWindow.Location = new Point((int)Math.Round(x), (int)Math.Round(y));
+                MainWindow.Show(root);
             }
-            MainWindow.Show(root);
+            catch (Exception e)
+            {
+                {
+                    if (e.GetType() == typeof(FileNotFoundException))
+                    {
+                        DialogResult a = MessageBox.Show($"kunde inte hitta filen, vill du ha en yogurt istället\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                        if (a == DialogResult.Yes)
+                        {
+                            Image bg = Image.FromFile(".\\yogurt.png");
+                            MainWindow.FormBorderStyle = FormBorderStyle.None;
+                            MainWindow.BackgroundImage = bg;
+                            MainWindow.BackColor = Color.Black;
+                            MainWindow.TransparencyKey = MainWindow.BackColor;
+                            MainWindow.Height = bg.Height;
+                            MainWindow.Width = bg.Width;
+
+                            MainWindow.Show(root);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"{e.Message}\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                        
+
+                }
+            }
+
+            
 
 
         }
         static string getNewPath()
         {
             FileDialog fdg = new OpenFileDialog();
+
+            fdg.Filter = "normal image files (.jpg, .jpeg, .png, .webp, .gif) |*.jpg;*.jpeg;*.png;*.webp;*.gif|weird ass image formats that no one uses (.avif, .tif, .tiff)|*.avif;*.tif;*.tiff|I dont think this image format will work honestly (.bmp, .svg, .ai, .eps, .raw, .cr2, .nef)|*.bmp;*.svg;*.ai;*.eps,*.raw;*.cr2;*.nef|all files for some reason IT'S NOT GONNA WORK PAL|*";
 
             if (fdg.ShowDialog() == DialogResult.OK) {
                 return fdg.FileName;
