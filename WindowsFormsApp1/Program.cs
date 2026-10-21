@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -24,21 +25,30 @@ namespace WindowsFormsApp1
         private static string defaultPath = ".\\DVD_VIDEO_logo.png";
         private static Color key = Color.FromArgb(255, 1, 1, 1);
         private static Color defaultKey = Color.FromArgb(255, 1, 1, 1);
-        private static Form[] children = new Form[0];
+
+
+
         [STAThread]
         static void Main()
         {
-            
-
+            Random rng = new Random();
+            float dx = 5f;
+            float dy = 5f;
+            float x = 0;
+            float y = 0;
+            bool randomizeSpeed = false;
+            bool randomizePos = false;
             Form mainForm = new Form();
+            mainForm.Icon = new Icon(".\\DVD_VIDEO_logo.ico");
+            mainForm.SizeGripStyle = SizeGripStyle.Hide;
+            mainForm.Size = new Size(400, 300);
 
             Button button = new Button();
             button.Text = "Spawn";
             button.Location = new Point(0, 50);
-            button.Click += (sender, e) =>
-            {
-                Spawn(mainForm);
-            };
+            
+            //Spawning function as at line 180 :3
+
 
             Label fileName = new Label();
             fileName.Text = path;
@@ -91,6 +101,79 @@ namespace WindowsFormsApp1
                 key = defaultKey;
             };
             resetColor.Location = new Point(100, 150);
+            
+            NumericUpDown xPos = new NumericUpDown();
+            xPos.Value = 0;
+            xPos.Maximum = Screen.FromControl(mainForm).Bounds.Width;
+            xPos.Width = 50;
+            xPos.Location = new Point(50, 225);
+
+            NumericUpDown yPos = new NumericUpDown();
+            yPos.Value = 0;
+            yPos.Maximum = Screen.FromControl(mainForm).Bounds.Height;
+            yPos.Width = 50;
+            yPos.Location = new Point(150, 225);
+
+            Label xPosLabel = new Label();
+            xPosLabel.Text = "x: ";
+            xPosLabel.Width = 50;
+            xPosLabel.Location = new Point(0, 225);
+
+            Label yPosLabel = new Label();
+            yPosLabel.Text = "y: ";
+            yPosLabel.Width = 50;
+            yPosLabel.Location = new Point(100, 225);
+
+            CheckBox randomPos = new CheckBox();
+            randomPos.Checked = false;
+            randomPos.Location = new Point(300, 225);
+
+            randomPos.CheckedChanged += (o, e) =>
+            {
+                randomizePos = randomPos.Checked;
+                xPos.Enabled = !randomPos.Checked;
+                yPos.Enabled = !randomPos.Checked;
+            };
+
+            Label randomPosLabel = new Label();
+            randomPosLabel.Text = "random pos";
+            randomPosLabel.Width = 50;
+            randomPosLabel.Location = new Point(250, 225);
+
+            NumericUpDown xSpeed = new NumericUpDown();
+            xSpeed.Value = 5;
+            xSpeed.Width = 50;
+            xSpeed.Location = new Point(50, 250);
+
+            Label dxLabel = new Label();
+            dxLabel.Text = "dx: ";
+            dxLabel.Location = new Point(0, 250);
+            dxLabel.Size = new Size(50,50);
+
+            Label dyLabel = new Label();
+            dyLabel.Text = "dy: ";
+            dyLabel.Location = new Point(100, 250);
+            dyLabel.Size = new Size(50, 50);
+
+            NumericUpDown ySpeed = new NumericUpDown();
+            ySpeed.Value = 5;
+            ySpeed.Width = 50;
+            ySpeed.Location = new Point(150, 250);
+
+            Label randomizeSpeedLabel = new Label();
+            randomizeSpeedLabel.Text = "random speed: ";
+            randomizeSpeedLabel.Width = 100;
+            randomizeSpeedLabel.Location = new Point(200,250);
+
+            CheckBox randomSpeed = new CheckBox();
+            randomSpeed.Checked = false;
+            randomSpeed.CheckedChanged += (o, e) =>
+            {
+                ySpeed.Enabled = !randomSpeed.Checked;
+                xSpeed.Enabled = !randomSpeed.Checked;
+                randomizeSpeed = randomSpeed.Checked;
+            };
+            randomSpeed.Location = new Point(300,250);
 
             Label Title = new Label();
             Title.Text = "Welcome to the DVD screen manager";
@@ -99,8 +182,36 @@ namespace WindowsFormsApp1
 
             Label info = new Label();
             info.Text = "close this window to close the dvd logos";
-            info.Location = new Point(0, 200);
+            info.Location = new Point(0, 300);
             info.Width = 300;
+
+
+
+            button.Click += (sender, e) =>
+            {
+                if (randomizeSpeed)
+                {
+                    dx = (float)rng.NextDouble() * 20 - 10;
+                    dy = (float)rng.NextDouble() * 20 - 10;
+                } else
+                {
+
+                    dx = (float)xSpeed.Value;
+                    dy = (float)ySpeed.Value;
+                }
+
+                if (randomizePos)
+                {
+                    x = (float)rng.NextDouble() * Screen.FromControl(mainForm).Bounds.Width;
+                    y = (float)rng.NextDouble() * Screen.FromControl(mainForm).Bounds.Height;
+                } else
+                {
+                    x = (float)xPos.Value;
+                    y = (float)yPos.Value;
+                }
+
+                    Spawn(mainForm, x, y, dx, dy);
+            };
 
 
             mainForm.Controls.Add(Title);
@@ -111,10 +222,23 @@ namespace WindowsFormsApp1
             mainForm.Controls.Add(fileSize);
             mainForm.Controls.Add(setColor);
             mainForm.Controls.Add(resetColor);
+            mainForm.Controls.Add(xPosLabel);
+            mainForm.Controls.Add(xPos);
+            mainForm.Controls.Add(yPosLabel);
+            mainForm.Controls.Add(yPos);
+            mainForm.Controls.Add(randomPos);
+            mainForm.Controls.Add(randomPosLabel);
+            mainForm.Controls.Add(xSpeed);
+            mainForm.Controls.Add(dxLabel);
+            mainForm.Controls.Add(ySpeed);
+            mainForm.Controls.Add(dyLabel);
+            mainForm.Controls.Add(randomizeSpeedLabel);
+            mainForm.Controls.Add(randomSpeed);
             mainForm.Controls.Add(info);
             mainForm.ShowDialog();
         }
-        static void Spawn(Form root)
+
+        static void Spawn(Form root, float x = 0, float y = 0, float dx = 5f, float dy = 5f)
         {
             Random rng = new Random();
             System.Windows.Forms.Timer tmr = new System.Windows.Forms.Timer();
@@ -128,11 +252,16 @@ namespace WindowsFormsApp1
                 MainWindow.TransparencyKey = MainWindow.BackColor;
                 MainWindow.Height = bg.Height;
                 MainWindow.Width = bg.Width;
+                if (x >= Screen.FromControl(root).Bounds.Width - MainWindow.Width)
+                {
+                    x = Screen.FromControl(root).Bounds.Width - MainWindow.Width-1;
+                }
+                if (y >= Screen.FromControl(root).Bounds.Height - MainWindow.Height)
+                {
+                    y = Screen.FromControl(root).Bounds.Height-1;
+                }
 
-                float dx = 5f;
-                float dy = 5f;
-                float x = 5;
-                float y = 5;
+
                 tmr.Interval = 1;
                 tmr.Tick += onmove;
                 tmr.Start();
@@ -150,6 +279,16 @@ namespace WindowsFormsApp1
                     y += dy;
                     MainWindow.Location = new Point((int)Math.Round(x), (int)Math.Round(y));
                 }
+
+                Button removeButton = new Button();
+                removeButton.Text = "Remove";
+                removeButton.Click += (o, e) =>
+                {
+                    MainWindow.Close();
+                    removeButton.Dispose();
+                };
+                removeButton.Location = new Point(100, 50);
+                root.Controls.Add(removeButton);
                 MainWindow.Show(root);
             }
             catch (Exception e)
