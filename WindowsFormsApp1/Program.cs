@@ -41,8 +41,9 @@ namespace WindowsFormsApp1
             Form mainForm = new Form();
             mainForm.Icon = new Icon(".\\DVD_VIDEO_logo.ico");
             mainForm.SizeGripStyle = SizeGripStyle.Hide;
-            mainForm.Size = new Size(400, 300);
-
+            mainForm.Size = new Size(400, 400);
+            mainForm.MaximizeBox = false;
+            mainForm.MinimizeBox = false;
             Button button = new Button();
             button.Text = "Spawn";
             button.Location = new Point(0, 50);
@@ -255,6 +256,7 @@ namespace WindowsFormsApp1
                 MainWindow.TransparencyKey = MainWindow.BackColor;
                 MainWindow.Height = bg.Height;
                 MainWindow.Width = bg.Width;
+                MainWindow.ShowInTaskbar = false;
                 if (x >= Screen.FromControl(root).Bounds.Width - MainWindow.Width)
                 {
                     x = Screen.FromControl(root).Bounds.Width - MainWindow.Width - 1;
