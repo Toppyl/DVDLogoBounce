@@ -47,7 +47,7 @@ namespace WindowsFormsApp1
             button.Text = "Spawn";
             button.Location = new Point(0, 50);
             
-            //Spawning function as at line 180 :3
+            //Spawning function is at line 190 :3
 
 
             Label fileName = new Label();
@@ -144,6 +144,7 @@ namespace WindowsFormsApp1
             xSpeed.Value = 5;
             xSpeed.Width = 50;
             xSpeed.Location = new Point(50, 250);
+            xSpeed.Minimum = -xSpeed.Maximum;
 
             Label dxLabel = new Label();
             dxLabel.Text = "dx: ";
@@ -155,10 +156,12 @@ namespace WindowsFormsApp1
             dyLabel.Location = new Point(100, 250);
             dyLabel.Size = new Size(50, 50);
 
+
             NumericUpDown ySpeed = new NumericUpDown();
             ySpeed.Value = 5;
             ySpeed.Width = 50;
             ySpeed.Location = new Point(150, 250);
+            ySpeed.Minimum = -ySpeed.Maximum;
 
             Label randomizeSpeedLabel = new Label();
             randomizeSpeedLabel.Text = "random speed: ";
@@ -254,11 +257,11 @@ namespace WindowsFormsApp1
                 MainWindow.Width = bg.Width;
                 if (x >= Screen.FromControl(root).Bounds.Width - MainWindow.Width)
                 {
-                    x = Screen.FromControl(root).Bounds.Width - MainWindow.Width-1;
+                    x = Screen.FromControl(root).Bounds.Width - MainWindow.Width - 1;
                 }
                 if (y >= Screen.FromControl(root).Bounds.Height - MainWindow.Height)
                 {
-                    y = Screen.FromControl(root).Bounds.Height-1;
+                    y = Screen.FromControl(root).Bounds.Height - MainWindow.Height - 1;
                 }
 
 
@@ -267,11 +270,11 @@ namespace WindowsFormsApp1
                 tmr.Start();
                 void onmove(object sender, EventArgs e)
                 {
-                    if (MainWindow.Location.X <= 0 || MainWindow.Location.X >= Screen.PrimaryScreen.WorkingArea.Width - MainWindow.Width)
+                    if (MainWindow.Location.X + dx <= 0 || MainWindow.Location.X + dx >= Screen.FromControl(MainWindow).Bounds.Width - MainWindow.Width)
                     {
                         dx = -dx;
                     }
-                    if (MainWindow.Location.Y <= 0 || MainWindow.Location.Y >= Screen.PrimaryScreen.WorkingArea.Height - MainWindow.Height)
+                    if (MainWindow.Location.Y + dy <= 0 || MainWindow.Location.Y + dy >= Screen.FromControl(MainWindow).Bounds.Height - MainWindow.Height)
                     {
                         dy = -dy;
                     }
