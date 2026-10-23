@@ -22,7 +22,7 @@ namespace WindowsFormsApp1
         /// 
 
         private static string path;
-        private static string defaultPath = ".\\DVD_VIDEO_logo.pang";
+        private static string defaultPath = ".\\DVD_VIDEO_logo.png";
         private static Color key = Color.FromArgb(255, 1, 1, 1);
         private static Color defaultKey = Color.FromArgb(255, 1, 1, 1);
 
@@ -49,6 +49,8 @@ namespace WindowsFormsApp1
             mainForm.Size = new Size(400, 400);
             mainForm.MaximizeBox = false;
             mainForm.MinimizeBox = false;
+            mainForm.FormBorderStyle = FormBorderStyle.FixedSingle;
+            mainForm.Text = "bouncing DVD logo manager";
             Button button = new Button();
             button.Text = "Spawn";
             button.Location = new Point(0, 50);
@@ -185,7 +187,7 @@ namespace WindowsFormsApp1
             randomSpeed.Location = new Point(300,250);
 
             Label Title = new Label();
-            Title.Text = "Welcome to the DVD screen manager";
+            Title.Text = "Welcome to the bouncing DVD logo manager";
             Title.Size = new Size(600,30);
             Title.Font = new Font(FontFamily.GenericSerif, 15);
 
