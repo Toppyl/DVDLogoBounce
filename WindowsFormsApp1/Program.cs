@@ -21,8 +21,8 @@ namespace WindowsFormsApp1
         /// </summary>
         /// 
 
-        private static string path = ".\\DVD_VIDEO_logo.png";
-        private static string defaultPath = ".\\DVD_VIDEO_logo.png";
+        private static string path;
+        private static string defaultPath = ".\\DVD_VIDEO_logo.pang";
         private static Color key = Color.FromArgb(255, 1, 1, 1);
         private static Color defaultKey = Color.FromArgb(255, 1, 1, 1);
 
@@ -32,6 +32,11 @@ namespace WindowsFormsApp1
         static void Main()
         {
             Random rng = new Random();
+            if (!File.Exists(defaultPath) && MessageBox.Show("Couldn't find deafult path, choose one now?","Warning",MessageBoxButtons.YesNo,MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                defaultPath = getNewPath();
+            }
+            path = defaultPath;
             float dx = 5f;
             float dy = 5f;
             float x = 0;
@@ -52,7 +57,7 @@ namespace WindowsFormsApp1
 
 
             Label fileName = new Label();
-            fileName.Text = path;
+            fileName.Text = path.Split('\\').Last();
             fileName.Location = new Point(200, 100);
             fileName.Size = new Size(200, 25);
 
@@ -266,12 +271,17 @@ namespace WindowsFormsApp1
                     y = Screen.FromControl(root).Bounds.Height - MainWindow.Height - 1;
                 }
 
+                
 
                 tmr.Interval = 1;
                 tmr.Tick += onmove;
                 tmr.Start();
                 void onmove(object sender, EventArgs e)
                 {
+                    if (MainWindow.IsDisposed == true)
+                    {
+                        return;
+                    }
                     if (MainWindow.Location.X + dx <= 0 || MainWindow.Location.X + dx >= Screen.FromControl(MainWindow).Bounds.Width - MainWindow.Width)
                     {
                         dx = -dx;
@@ -299,25 +309,32 @@ namespace WindowsFormsApp1
             catch (Exception e)
             {
                 {
-                    if (e.GetType() == typeof(FileNotFoundException))
-                    {
-                        DialogResult a = MessageBox.Show($"kunde inte hitta filen, vill du ha en yogurt istället\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-                        if (a == DialogResult.Yes)
-                        {
-                            Image bg = Image.FromFile(".\\yogurt.png");
-                            MainWindow.FormBorderStyle = FormBorderStyle.None;
-                            MainWindow.BackgroundImage = bg;
-                            MainWindow.BackColor = Color.Black;
-                            MainWindow.TransparencyKey = MainWindow.BackColor;
-                            MainWindow.Height = bg.Height;
-                            MainWindow.Width = bg.Width;
+                    switch(e.GetBaseException()){
+                        case FileNotFoundException:
+                            DialogResult a = MessageBox.Show($"kunde inte hitta filen, vill du ha en yogurt istället\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                            if (a == DialogResult.Yes)
+                            {
+                                Image bg = Image.FromFile(".\\yogurt.png");
+                                MainWindow.FormBorderStyle = FormBorderStyle.None;
+                                MainWindow.BackgroundImage = bg;
+                                MainWindow.BackColor = Color.Black;
+                                MainWindow.TransparencyKey = MainWindow.BackColor;
+                                MainWindow.Height = bg.Height;
+                                MainWindow.Width = bg.Width;
 
-                            MainWindow.Show(root);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show($"{e.Message}\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MainWindow.Show(root);
+                            }
+                            break;
+                        case OutOfMemoryException:
+                            if (path == defaultPath && MessageBox.Show($"Default image too large, do you want to set another one? (current default image size: {File.ReadAllBytes(defaultPath).Length})", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                            {
+                                defaultPath = getNewPath();
+                                path = defaultPath;
+                            }
+                            break;
+                        default:
+                            MessageBox.Show($"{e.Message}\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            break;
                     }
                         
 
