@@ -316,15 +316,21 @@ namespace WindowsFormsApp1
                             DialogResult a = MessageBox.Show($"kunde inte hitta filen, vill du ha en yogurt istället\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                             if (a == DialogResult.Yes)
                             {
-                                Image bg = Image.FromFile(".\\yogurt.png");
-                                MainWindow.FormBorderStyle = FormBorderStyle.None;
-                                MainWindow.BackgroundImage = bg;
-                                MainWindow.BackColor = Color.Black;
-                                MainWindow.TransparencyKey = MainWindow.BackColor;
-                                MainWindow.Height = bg.Height;
-                                MainWindow.Width = bg.Width;
+                                try
+                                {
+                                    Image bg = Image.FromFile(".\\yogurt.png");
+                                    MainWindow.FormBorderStyle = FormBorderStyle.None;
+                                    MainWindow.BackgroundImage = bg;
+                                    MainWindow.BackColor = Color.Black;
+                                    MainWindow.TransparencyKey = MainWindow.BackColor;
+                                    MainWindow.Height = bg.Height;
+                                    MainWindow.Width = bg.Width;
 
-                                MainWindow.Show(root);
+                                    MainWindow.Show(root);
+                                } catch (Exception ex)
+                                {
+                                    MessageBox.Show($"{ex.Message}\n\n{ex.StackTrace}", ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
                             }
                             break;
                         case OutOfMemoryException:
@@ -333,6 +339,7 @@ namespace WindowsFormsApp1
                                 defaultPath = getNewPath();
                                 path = defaultPath;
                             }
+                            MessageBox.Show($"{e.Message}\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             break;
                         default:
                             MessageBox.Show($"{e.Message}\n\n{e.StackTrace}", e.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
